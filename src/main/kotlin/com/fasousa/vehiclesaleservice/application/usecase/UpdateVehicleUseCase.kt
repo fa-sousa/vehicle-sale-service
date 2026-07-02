@@ -1,4 +1,7 @@
 package com.fasousa.vehiclesaleservice.application.usecase
 
-class UpdateVehicleUseCase {
+import com.fasousa.vehiclesaleservice.domain.model.Vehicle
+
+interface UpdateVehicleUseCase {
+    fun execute(vehicle: Vehicle): Vehicle
 }
