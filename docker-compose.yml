@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: vehicle_sale_service_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: vehicle_sale_service_db
+      POSTGRES_USER: vehicle_user
+      POSTGRES_PASSWORD: vehicle_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - vehicle_sale_service_pgdata:/var/lib/postgresql/data
+
+volumes:
+  vehicle_sale_service_pgdata:

@@ -1,7 +1,7 @@
-package com.fasousa.vehiclesaleservice.infrastructure.persistence.mapper
+package com.fasousa.vehiclesaleservice.infrastructure.mapper
 
 import com.fasousa.vehiclesaleservice.domain.model.Vehicle
-import com.fasousa.vehiclesaleservice.infrastructure.persistence.entity.VehicleEntity
+import com.fasousa.vehiclesaleservice.infrastructure.entity.VehicleEntity
 
 object VehicleMapper {
 

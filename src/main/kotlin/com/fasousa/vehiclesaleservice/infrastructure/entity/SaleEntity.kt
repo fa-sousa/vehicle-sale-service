@@ -1,4 +1,4 @@
-package com.fasousa.vehiclesaleservice.infrastructure.persistence.entity
+package com.fasousa.vehiclesaleservice.infrastructure.entity
 
 import com.fasousa.vehiclesaleservice.domain.model.PaymentStatus
 import jakarta.persistence.*

@@ -1,7 +1,7 @@
-package com.fasousa.vehiclesaleservice.infrastructure.persistence.repository
+package com.fasousa.vehiclesaleservice.infrastructure.repository
 
 import com.fasousa.vehiclesaleservice.domain.model.VehicleStatus
-import com.fasousa.vehiclesaleservice.infrastructure.persistence.entity.VehicleEntity
+import com.fasousa.vehiclesaleservice.infrastructure.entity.VehicleEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface VehicleJpaRepository : JpaRepository<VehicleEntity, Long> {

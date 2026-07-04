@@ -1,6 +1,6 @@
-package com.fasousa.vehiclesaleservice.infrastructure.persistence.repository
+package com.fasousa.vehiclesaleservice.infrastructure.repository
 
-import com.fasousa.vehiclesaleservice.infrastructure.persistence.entity.SaleEntity
+import com.fasousa.vehiclesaleservice.infrastructure.entity.SaleEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface SaleJpaRepository : JpaRepository<SaleEntity, Long> {
