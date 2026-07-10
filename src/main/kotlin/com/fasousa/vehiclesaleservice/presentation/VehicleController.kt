@@ -6,6 +6,7 @@ import com.fasousa.vehiclesaleservice.domain.model.VehicleStatus
 import com.fasousa.vehiclesaleservice.presentation.request.CreateVehicleRequest
 import com.fasousa.vehiclesaleservice.presentation.request.UpdateVehicleRequest
 import com.fasousa.vehiclesaleservice.presentation.request.PurchaseVehicleRequest
+import com.fasousa.vehiclesaleservice.presentation.response.SaleResponse
 import com.fasousa.vehiclesaleservice.presentation.response.VehicleResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -49,7 +50,19 @@ class VehicleController(
 
     @PostMapping("/{id}/purchase")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun purchase(@PathVariable id: Long, @RequestBody req: PurchaseVehicleRequest) {
-        purchaseVehicleUseCase.execute(id, req.cpf)
+    fun purchase(
+        @PathVariable id: Long,
+        @RequestBody req: PurchaseVehicleRequest
+    ): SaleResponse {
+        val sale = purchaseVehicleUseCase.execute(id, req.cpf)
+
+        return SaleResponse(
+            id = sale.id,
+            vehicleId = sale.vehicleId,
+            cpf = sale.cpf,
+            paymentCode = sale.paymentCode,
+            paymentStatus = sale.paymentStatus,
+            saleDate = sale.saleDate
+        )
     }
 }
