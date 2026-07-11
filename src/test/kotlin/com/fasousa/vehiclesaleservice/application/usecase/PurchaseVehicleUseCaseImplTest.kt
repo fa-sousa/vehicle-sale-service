@@ -1,88 +1,130 @@
 package com.fasousa.vehiclesaleservice.application.usecase
 
 import com.fasousa.vehiclesaleservice.application.service.PurchaseVehicleUseCaseImpl
-import com.fasousa.vehiclesaleservice.domain.model.*
+import com.fasousa.vehiclesaleservice.domain.model.PaymentStatus
+import com.fasousa.vehiclesaleservice.domain.model.Sale
+import com.fasousa.vehiclesaleservice.domain.model.Vehicle
+import com.fasousa.vehiclesaleservice.domain.model.VehicleStatus
 import com.fasousa.vehiclesaleservice.domain.repository.SaleRepository
 import com.fasousa.vehiclesaleservice.domain.repository.VehicleRepository
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
-import java.math.BigDecimal
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.math.BigDecimal
 
-@ExtendWith(MockitoExtension::class)
 class PurchaseVehicleUseCaseImplTest {
 
-    @Mock
-    lateinit var vehicleRepository: VehicleRepository
+    private lateinit var vehicleRepository: VehicleRepository
+    private lateinit var saleRepository: SaleRepository
+    private lateinit var useCase: PurchaseVehicleUseCaseImpl
 
-    @Mock
-    lateinit var saleRepository: SaleRepository
+    @BeforeEach
+    fun setUp() {
+        vehicleRepository = mock()
+        saleRepository = mock()
 
-    @InjectMocks
-    lateinit var useCase: PurchaseVehicleUseCaseImpl
+        useCase = PurchaseVehicleUseCaseImpl(
+            vehicleRepository = vehicleRepository,
+            saleRepository = saleRepository
+        )
+    }
 
     @Test
-    fun `GIVEN available vehicle WHEN purchase THEN create sale`() {
-
+    fun `should purchase an available vehicle`() {
         val vehicle = Vehicle(
             id = 1L,
-            brand = "Toyota",
-            model = "Corolla",
+            brand = "Honda",
+            model = "Civic",
             year = 2024,
-            color = "White",
-            price = BigDecimal("100000"),
+            color = "Prata",
+            price = BigDecimal("125000.00"),
             status = VehicleStatus.AVAILABLE
         )
 
-        `when`(vehicleRepository.findById(1L))
+        val savedSale = Sale(
+            id = 10L,
+            vehicleId = 1L,
+            cpf = "12345678900",
+            paymentCode = "payment-code",
+            paymentStatus = PaymentStatus.PENDING
+        )
+
+        whenever(vehicleRepository.findById(1L))
             .thenReturn(vehicle)
 
-        `when`(saleRepository.save(any()))
-            .thenAnswer { it.arguments[0] }
+        whenever(vehicleRepository.save(any()))
+            .thenAnswer { it.arguments[0] as Vehicle }
 
-        val sale = useCase.execute(1L, "12345678901")
+        whenever(saleRepository.save(any()))
+            .thenReturn(savedSale)
 
-        assertEquals("12345678901", sale.cpf)
+        val result = useCase.execute(
+            vehicleId = 1L,
+            cpf = "12345678900"
+        )
 
-        verify(vehicleRepository).save(any())
+        assertEquals(10L, result.id)
+        assertEquals(1L, result.vehicleId)
+        assertEquals(PaymentStatus.PENDING, result.paymentStatus)
+
+        val vehicleCaptor = argumentCaptor<Vehicle>()
+        verify(vehicleRepository).save(vehicleCaptor.capture())
+
+        assertEquals(
+            VehicleStatus.PENDING_PAYMENT,
+            vehicleCaptor.firstValue.status
+        )
+
         verify(saleRepository).save(any())
     }
 
     @Test
-    fun `GIVEN vehicle not found WHEN purchase THEN throw exception`() {
-
-        `when`(vehicleRepository.findById(1L))
+    fun `should throw exception when vehicle does not exist`() {
+        whenever(vehicleRepository.findById(99L))
             .thenReturn(null)
 
-        assertThrows<IllegalArgumentException> {
-            useCase.execute(1L, "12345678901")
+        val exception = assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            useCase.execute(
+                vehicleId = 99L,
+                cpf = "12345678900"
+            )
         }
+
+        assertEquals("Vehicle not found", exception.message)
     }
 
     @Test
-    fun `GIVEN sold vehicle WHEN purchase THEN throw exception`() {
-
+    fun `should throw exception when vehicle is unavailable`() {
         val vehicle = Vehicle(
-            id = 1L,
+            id = 2L,
             brand = "Toyota",
             model = "Corolla",
-            year = 2024,
-            color = "White",
-            price = BigDecimal("100000"),
-            status = VehicleStatus.SOLD
+            year = 2023,
+            color = "Preto",
+            price = BigDecimal("100000.00"),
+            status = VehicleStatus.PENDING_PAYMENT
         )
 
-        `when`(vehicleRepository.findById(1L))
+        whenever(vehicleRepository.findById(2L))
             .thenReturn(vehicle)
 
-        assertThrows<IllegalStateException> {
-            useCase.execute(1L, "12345678901")
+        val exception = assertThrows(
+            IllegalStateException::class.java
+        ) {
+            useCase.execute(
+                vehicleId = 2L,
+                cpf = "12345678900"
+            )
         }
+
+        assertEquals("Vehicle unavailable", exception.message)
     }
 }
