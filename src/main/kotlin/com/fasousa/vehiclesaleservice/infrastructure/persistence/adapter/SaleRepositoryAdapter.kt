@@ -25,6 +25,8 @@ class SaleRepositoryAdapter(
     }
 
     override fun findById(id: Long): Sale? {
-        TODO("Not yet implemented")
+        return saleJpaRepository.findById(id)
+            .map(SaleMapper::toDomain)
+            .orElse(null)
     }
 }
