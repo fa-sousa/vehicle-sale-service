@@ -4,28 +4,48 @@ services:
   postgres:
     image: postgres:16
     container_name: vehicle_sale_service_postgres
-    restart: always
+    restart: unless-stopped
+
     environment:
       POSTGRES_DB: vehicle_sale_service_db
       POSTGRES_USER: vehicle_user
       POSTGRES_PASSWORD: vehicle_pass
+
     ports:
       - "5434:5432"
+
     volumes:
       - vehicle_sale_service_pgdata:/var/lib/postgresql/data
 
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U vehicle_user -d vehicle_sale_service_db"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     container_name: vehicle_sale_service_app
-    restart: always
-    ports:
-      - "8080:8080"
+    restart: unless-stopped
+
     environment:
       JDBC_DATABASE_URL: jdbc:postgresql://postgres:5432/vehicle_sale_service_db
       JDBC_DATABASE_USERNAME: vehicle_user
       JDBC_DATABASE_PASSWORD: vehicle_pass
+
+    ports:
+      - "8080:8080"
+
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   vehicle_sale_service_pgdata:
