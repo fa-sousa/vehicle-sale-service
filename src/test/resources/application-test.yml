@@ -3,16 +3,21 @@ spring:
     name: vehicle-sale-service
 
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5434/vehicle_sale_service_db}
-    username: ${JDBC_DATABASE_USERNAME:vehicle_user}
-    password: ${JDBC_DATABASE_PASSWORD:vehicle_pass}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:vehicle_sale_service_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
+
+  sql:
+    init:
+      mode: never
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: 0
