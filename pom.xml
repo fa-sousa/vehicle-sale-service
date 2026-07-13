@@ -32,9 +32,13 @@
 		<kotlin.version>1.9.25</kotlin.version>
 
 		<sonar.organization>fa-sousa</sonar.organization>
-		<sonar.projectKey>fa-sousa_vehicle-platform</sonar.projectKey>
-		<sonar.projectName>vehicle-platform</sonar.projectName>
+		<sonar.projectKey>fa-sousa_vehicle-sale-service</sonar.projectKey>
+		<sonar.projectName>vehicle-sale-service</sonar.projectName>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.build.directory}/site/jacoco/jacoco.xml
+		</sonar.coverage.jacoco.xmlReportPaths>
 
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.build.directory}/site/jacoco/jacoco.xml

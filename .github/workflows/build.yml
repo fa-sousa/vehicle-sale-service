@@ -33,16 +33,28 @@ jobs:
 
       - name: Show test configuration
         run: |
+          echo "Commit:"
           git rev-parse HEAD
+
+          echo "application-test.yml:"
           cat src/test/resources/application-test.yml
+
+          echo "Datasource environment variables:"
+          env | grep -E 'JDBC_DATABASE|SPRING_DATASOURCE|DB_URL' || true
 
       - name: Build, test and coverage
         run: ./mvnw clean verify
 
       - name: SonarQube analysis
+        if: success()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./mvnw sonar:sonar \
             -Dsonar.token="${SONAR_TOKEN}" \
             -Dsonar.qualitygate.wait=true
+
+      - name: Show test failure details
+        if: failure()
+        run: |
+          cat target/surefire-reports/com.fasousa.vehiclesaleservice.VehicleSaleServiceApplicationTests.txt || true
