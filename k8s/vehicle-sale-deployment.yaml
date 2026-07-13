@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicle-sale-service
+  namespace: vehicle-system
+  labels:
+    app: vehicle-sale-service
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: vehicle-sale-service
+
+  template:
+    metadata:
+      labels:
+        app: vehicle-sale-service
+
+    spec:
+      containers:
+        - name: vehicle-sale-service
+          image: ghcr.io/fa-sousa/vehicle-sale-service:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+
+            - name: JDBC_DATABASE_URL
+              value: jdbc:postgresql://vehicle-sale-postgres:5432/vehicle_sale_service_db
+
+            - name: JDBC_DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: vehicle-sale-postgres-secret
+                  key: POSTGRES_USER
+
+            - name: JDBC_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vehicle-sale-postgres-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "768Mi"
+              cpu: "500m"
