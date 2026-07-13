@@ -1,4 +1,4 @@
-name: Build
+name: Build and SonarQube
 
 on:
   push:
@@ -8,30 +8,41 @@ on:
 
   pull_request:
     branches:
+      - develop
       - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: actions/checkout@v4
-
-      - name: Setup Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
           cache: maven
 
-      - name: Build
-        run: mvn clean verify
+      - name: Grant Maven Wrapper permission
+        run: chmod +x mvnw
 
-      - name: SonarQube
+      - name: Show test configuration
+        run: |
+          git rev-parse HEAD
+          cat src/test/resources/application-test.yml
+
+      - name: Build, test and coverage
+        run: ./mvnw clean verify
+
+      - name: SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: >
-          mvn sonar:sonar
-          -Dsonar.token=${SONAR_TOKEN}
+        run: |
+          ./mvnw sonar:sonar \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=true
