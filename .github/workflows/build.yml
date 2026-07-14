@@ -11,50 +11,34 @@ on:
       - develop
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: maven
 
-      - name: Grant Maven Wrapper permission
-        run: chmod +x mvnw
-
-      - name: Show test configuration
-        run: |
-          echo "Commit:"
-          git rev-parse HEAD
-
-          echo "application-test.yml:"
-          cat src/test/resources/application-test.yml
-
-          echo "Datasource environment variables:"
-          env | grep -E 'JDBC_DATABASE|SPRING_DATASOURCE|DB_URL' || true
-
-      - name: Build, test and coverage
+      - name: Build and tests
         run: ./mvnw clean verify
 
-      - name: SonarQube analysis
-        if: success()
+      - name: SonarCloud
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./mvnw sonar:sonar \
-            -Dsonar.token="${SONAR_TOKEN}" \
-            -Dsonar.qualitygate.wait=true
-
-      - name: Show test failure details
-        if: failure()
-        run: |
-          cat target/surefire-reports/com.fasousa.vehiclesaleservice.VehicleSaleServiceApplicationTests.txt || true
+        run: >
+          ./mvnw
+          org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar
+          -Dsonar.token=${SONAR_TOKEN}

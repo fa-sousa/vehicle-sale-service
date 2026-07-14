@@ -1,19 +1,19 @@
 spring:
-  application:
-    name: vehicle-sale-service
-
   datasource:
-    url: jdbc:h2:mem:vehicle_sale_service_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:vehicle_sale_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
 
   sql:
     init:

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vehicle-sale-postgres-secret
+  namespace: vehicle-system
+type: Opaque
+stringData:
+  POSTGRES_DB: vehicle_sale_service_db
+  POSTGRES_USER: vehicle_user
+  POSTGRES_PASSWORD: vehicle_password
