@@ -10,14 +10,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -26,12 +30,14 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Build
-        run: mvn clean verify
+      - name: Build and tests
+        run: ./mvnw clean verify
 
-      - name: SonarQube
+      - name: SonarCloud
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
-          mvn sonar:sonar
+          ./mvnw
+          org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar
           -Dsonar.token=${SONAR_TOKEN}
